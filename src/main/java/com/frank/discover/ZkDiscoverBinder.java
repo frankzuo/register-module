@@ -13,9 +13,11 @@ public class ZkDiscoverBinder {
 
     public ZkDiscoverBinder(String zkServers, int timeOut){
         zkClient = new ZkClient(zkServers, timeOut);
+        zkClient.waitUntilConnected();
     }
 
     public void connect(String... nodes){
+        List<String> childNodes;
         for(String node : nodes){
             if(node == null){
                 continue;
@@ -23,21 +25,31 @@ public class ZkDiscoverBinder {
             if(!zkClient.exists(node)){
                 zkClient.createPersistent(node, true);
             }
-            zkClient.subscribeChildChanges(node, new ZkDiscoverListener());
-            List<String> childs = zkClient.getChildren(node);
-            for(String child : childs){
+            zkClient.subscribeChildChanges(node, ZkDiscoverListener.getInstance());
+            childNodes = zkClient.getChildren(node);
+            int maxVersion = 0;
+            for(String child : childNodes){
                 if(child == null){
                     continue;
                 }
-                String[] params = child.split(":");
+                String[] infos = child.split("\\|");
+                if(infos.length !=2 ) {
+                    continue;
+                }
+                String[] params = infos[0].split(":");
                 if(params.length != 2){
                     continue;
                 }
+                int tempVersion = Integer.parseInt(infos[1]);
+                if (tempVersion > maxVersion){
+                    maxVersion = tempVersion;
+                }
                 String ip = params[0];
                 int port = Integer.parseInt(params[1]);
-                Connection connection = new ClientConnectImpl(ip, port);
+                Connection connection = new ClientConnectImpl(ip, port, tempVersion);
                 ServiceManager.getInstance().addService(node, child, connection);
             }
+            ServiceManager.getInstance().checkRecommendNode(node, maxVersion);
         }
     }
 }

@@ -21,8 +21,8 @@ public class ZKRegister {
         return instance;
     }
 
-    public void register(String node, String ip, int port){
-        String child = ip + ":" + port;
+    public void register(String node, String ip, int port, int version){
+        String child = ip + ":" + port + "|" + version;
         registryManager.register(node, child);
     }
 

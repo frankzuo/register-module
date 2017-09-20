@@ -13,5 +13,13 @@ public interface Connection {
 
     public int getPort();
 
+    public void connect();
+
     public boolean isConnect();
+
+    public boolean isRecommend();
+
+    public void setRecommend(boolean recommend);
+
+    public int getVersion();
 }

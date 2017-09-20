@@ -1,11 +1,13 @@
 package com.frank.net;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * Created by zuowenbin on 17/8/27.
  */
+@ChannelHandler.Sharable
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private MessageHandler messageHandler;
